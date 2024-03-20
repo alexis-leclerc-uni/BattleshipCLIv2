@@ -53,15 +53,17 @@ Manette::Manette(const std::string& port){
         if(raw_msg.size()>0){
             //cout << "raw_msg: " << raw_msg << std::endl;  // debug
             // Transfert du message en json
-            //parsed_received_msg = json::parse(raw_msg);
-            std::cout << "Message de l'Arduino: " << raw_msg << std::endl;
+            parsed_received_msg = json::parse(raw_msg);
+            if(parsed_received_msg["bouton1"] == 1){
+                std::cout << "yooooo bouton 1";
+            }
         }
         
         //Changement de l'etat led
         led_state = !led_state;
 
         // Bloquer le fil pour environ 1 sec
-        Sleep(10); // 1000ms
+        Sleep(15); // 1000ms
     }
 }
 

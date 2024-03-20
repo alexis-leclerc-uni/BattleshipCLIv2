@@ -1,1 +1,1 @@
-g++ -std=c++11 -pthread main.cpp .\lib\*.cpp  .\manette.cpp .\external_libs\serial\SerialPort.cpp
+g++ -std=c++11 -pthread main.cpp .\lib\*.cpp  .\manette.cpp .\external_libs\serial\SerialPort.cpp --verbose
