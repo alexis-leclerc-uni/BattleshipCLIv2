@@ -51,7 +51,7 @@ Manette::Manette(const std::string& port){
                 if(value != old_received_msg[key]){
                     if((key).find("Acc") && key.find("time") && key.find("pot")){
                         if(old_received_msg[key] == 1 && value == 0){
-                            std::cout << key << " a été pesé"
+                            std::cout << key << " pressed" << std::endl;
                         }
                     }
                 }
