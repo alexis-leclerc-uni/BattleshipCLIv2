@@ -3,33 +3,38 @@
 
 #include "lib/jeu.h"
 #include "manette.h"
+#include "external_libs/concurrent_queue.hpp"
 #include <fstream>
 #include <thread> 
 
-int lejeu();
-int manetteFn();
+using lime62::concurrent_queue;
+
+int lejeu(concurrent_queue<std::string>* q);
+int manetteFn(concurrent_queue<std::string>* q);
 
 int main()
 {
+    concurrent_queue<std::string> q;
 
     //il y aurait dequoi à patenter si on veut que les deux puisse print du serial, je le fais pas car c'est pas le but final du jeu
-    std::thread t2(manetteFn);
-    t2.join();
-    std::thread t1(lejeu);
+    std::thread t1(lejeu, &q);
+    std::thread t2(manetteFn, &q);
     t1.join();
+    t2.join();
     return 0;
 }
 
-int manetteFn(){
+int manetteFn(concurrent_queue<std::string>* q){
     const std::string &port = "COM3";
-    Manette *manette = new Manette(port);
+    Manette *manette = new Manette(port, ref(q));
     return 0;
 }
 
 
-int lejeu()
+int lejeu(concurrent_queue<std::string>* q)
 {
-    Jeu jeu;
+    //std::cout<<sizeof(q);
+    Jeu jeu(q);
     int reponse;
     while ((reponse = jeu.menuStartUp(std::cout, std::cin)) == INCORRECT) {}
     if (reponse == QUITTER)

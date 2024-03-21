@@ -9,10 +9,15 @@
 #define MODE_STRATEGIE 3
 
 #include <iostream>
+#include <windows.h>
 #include "Joueur.h"
+#include "../external_libs/concurrent_queue.hpp"
+
+using lime62::concurrent_queue;
 
 class Jeu {
     public:
+        Jeu(concurrent_queue<std::string>* q);
         Jeu();
         ~Jeu();
         bool afficherStartUp(std::ostream& sout);
@@ -40,6 +45,7 @@ class Jeu {
         int tailleEnX;
         int tailleEnY;
         int mode;
+        concurrent_queue<std::string>* q;
         std::vector<Joueur*> vecJoueur;
 };
 

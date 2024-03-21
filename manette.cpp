@@ -8,7 +8,7 @@
 #include "manette.h"
 
 
-Manette::Manette(const std::string& port){
+Manette::Manette(const std::string& port, concurrent_queue<std::string>* q){
     std::string raw_msg;
 
     // Initialisation du port de communication
@@ -27,6 +27,7 @@ Manette::Manette(const std::string& port){
     int led_state = 1;
     json j_msg_send, parsed_received_msg, old_received_msg;
 
+
     // Boucle pour tester la communication bidirectionnelle Arduino-PC
     for(int i=0; i<10000; i++){
         // Envoie message Arduino
@@ -42,7 +43,7 @@ Manette::Manette(const std::string& port){
         
         // Impression du message de l'Arduino si valide
         if(raw_msg.size()>0){
-            //cout << "raw_msg: " << raw_msg << std::endl;  // debug
+            //std::cout << "raw_msg: " << raw_msg << std::endl;  // debug
             // Transfert du message en json
             parsed_received_msg = json::parse(raw_msg);
             for (auto it = parsed_received_msg.items().begin(); it != parsed_received_msg.items().end(); ++it) {
@@ -50,8 +51,8 @@ Manette::Manette(const std::string& port){
                 auto value = it.value();
                 if(value != old_received_msg[key]){
                     if((key).find("Acc") && key.find("time") && key.find("pot")){
-                        if(old_received_msg[key] == 1 && value == 0){
-                            std::cout << key << " pressed" << std::endl;
+                        if(old_received_msg[key] == 0 && value == 1){
+                            q->push(key);
                         }
                     }
                 }
@@ -70,7 +71,7 @@ Manette::Manette(const std::string& port){
         led_state = !led_state;
 
         // Bloquer le fil pour environ 1 sec
-        Sleep(15); // 1000ms
+        Sleep(35); // 1000ms
     }
 }
 

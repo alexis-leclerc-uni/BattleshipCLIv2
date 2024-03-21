@@ -6,6 +6,13 @@
 Jeu::Jeu()
 {
 }
+//Description : Construit le jeu avec queue
+//Entrée : rien
+//Sortie : rien
+Jeu::Jeu(concurrent_queue<std::string>* queue)
+{
+    this->q = queue;
+}
 //Description : Déconstruit le jeu (déallouer la mémoire des Joueur)
 //Entrée : rien
 //Sortie : rien
@@ -28,12 +35,18 @@ bool Jeu::afficherStartUp(std::ostream& sout)
 //Sortie : 0 pour Confirmer et 1 pour Quitter
 int Jeu::menuStartUp(std::ostream& sout, std::istream& sin)
 {
+    std::string result = "";
+    std::cout<<sizeof(this->q);
     afficherStartUp(sout);
-    char c;
-    sin >> c;
-    if (c == 'y' || c == 'Y')
+
+    while(this->q->empty() && result == ""){
+        Sleep(10);
+    };
+    result = this->q->front();
+    this->q->pop();
+    if (result == "bouton1")
         return CONFIRMER;
-    if (c == 'n' || c == 'n')
+    if (result == "bouton2")
         return QUITTER;
     return INCORRECT;
 }
