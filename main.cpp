@@ -12,6 +12,7 @@ int manetteFn();
 int main()
 {
 
+    //il y aurait dequoi à patenter si on veut que les deux puisse print du serial, je le fais pas car c'est pas le but final du jeu
     std::thread t2(manetteFn);
     t2.join();
     std::thread t1(lejeu);

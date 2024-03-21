@@ -24,6 +24,8 @@ public:
   // Function to receive a message from the Arduino
   bool RcvFromSerial(std::string& msg);
 
+  bool try_parse_int(const std::string& str);
+
 private:
   SerialPort* arduino; // Serial port object
 };

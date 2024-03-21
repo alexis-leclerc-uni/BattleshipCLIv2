@@ -7,16 +7,7 @@
 /*------------------------------ Librairies ---------------------------------*/
 #include "manette.h"
 
-/*-------------------------- Librairies externes ----------------------------*/
 
-/*------------------------------ Constantes ---------------------------------*/
-
-
-
-
-/*---------------------------- Variables globales ---------------------------*/
-
-/*----------------------------- Fonction "Main" -----------------------------*/
 Manette::Manette(const std::string& port){
     std::string raw_msg;
 
@@ -34,7 +25,7 @@ Manette::Manette(const std::string& port){
     
     // Structure de donnees JSON pour envoie et reception
     int led_state = 1;
-    json j_msg_send, parsed_received_msg;
+    json j_msg_send, parsed_received_msg, old_received_msg;
 
     // Boucle pour tester la communication bidirectionnelle Arduino-PC
     for(int i=0; i<10000; i++){
@@ -54,9 +45,25 @@ Manette::Manette(const std::string& port){
             //cout << "raw_msg: " << raw_msg << std::endl;  // debug
             // Transfert du message en json
             parsed_received_msg = json::parse(raw_msg);
-            if(parsed_received_msg["bouton1"] == 1){
-                std::cout << "yooooo bouton 1";
+            for (auto it = parsed_received_msg.items().begin(); it != parsed_received_msg.items().end(); ++it) {
+                std::string key = it.key();
+                auto value = it.value();
+                if(value != old_received_msg[key]){
+                    if((key).find("Acc") && key.find("time") && key.find("pot")){
+                        if(old_received_msg[key] == 1 && value == 0){
+                            std::cout << key << " a été pesé"
+                        }
+                    }
+                }
+
             }
+            old_received_msg = parsed_received_msg;
+            /*
+            for(int i = 0; i <= sizeof(parsed_received_msg); i++){
+                std::cout << i << std::endl;
+                std::cout << parsed_received_msg[i];
+            }
+            */
         }
         
         //Changement de l'etat led
@@ -67,7 +74,16 @@ Manette::Manette(const std::string& port){
     }
 }
 
-
+bool Manette::try_parse_int(const std::string& str){
+    try {
+        std::stoi(str);
+        return true;
+    } catch (const std::invalid_argument& e) {
+        return false;
+    } catch (const std::out_of_range& e) {
+        return false;
+    }
+}
 
 /*---------------------------Definition de fonctions ------------------------*/
 bool Manette::SendToSerial(json j_msg){
