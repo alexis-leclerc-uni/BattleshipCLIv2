@@ -36,19 +36,34 @@ bool Jeu::afficherStartUp(std::ostream& sout)
 int Jeu::menuStartUp(std::ostream& sout, std::istream& sin)
 {
     std::string result = "";
-    std::cout<<sizeof(this->q);
     afficherStartUp(sout);
 
-    while(this->q->empty() && result == ""){
-        Sleep(10);
+    while(this->q->empty()){
+        std::cout << "ATTENTE" << std::endl;
+        Sleep(100);
     };
     result = this->q->front();
     this->q->pop();
     if (result == "bouton1")
         return CONFIRMER;
-    if (result == "bouton2")
+    else if (result == "bouton2")
         return QUITTER;
-    return INCORRECT;
+    else if (result == "bouton3")
+        return INCORRECT;
+    else if (result == "bouton4")
+        return INCORRECT;
+    else if (result[0] == 'p' && result[1] == 'o' && result[2] == 't'){
+        std::cout << result;
+        return INCORRECT;
+    }
+    else if (result == "")
+        return INCORRECT;
+    else if (result == "")
+        return INCORRECT;
+    else if (result == "")
+        return INCORRECT;
+    else if (result == "")
+        return INCORRECT;
 }
 //Description : Afficher le menu de réglage
 //Entrée : un canal de communication

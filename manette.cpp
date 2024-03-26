@@ -45,19 +45,57 @@ Manette::Manette(const std::string& port, concurrent_queue<std::string>* q){
         if(raw_msg.size()>0){
             //std::cout << "raw_msg: " << raw_msg << std::endl;  // debug
             // Transfert du message en json
+            //std::cout << raw_msg << std::endl;
             parsed_received_msg = json::parse(raw_msg);
             for (auto it = parsed_received_msg.items().begin(); it != parsed_received_msg.items().end(); ++it) {
                 std::string key = it.key();
                 auto value = it.value();
                 if(value != old_received_msg[key]){
-                    if((key).find("Acc") && key.find("time") && key.find("pot")){
+                    if((key).find("Acc") && key.find("time") && key.find("pot") && key.find("JoyX") && key.find("JoyY")){
                         if(old_received_msg[key] == 0 && value == 1){
                             q->push(key);
                         }
+                        if (value + 15 < old_received_msg[key] || value - 15 > old_received_msg[key]) {
+                            if (value < 100)
+                                q->push("pot0" + std::to_string(value));
+                            else
+                                q->push("pot" + std::to_string(value));
+                        }
                     }
                 }
-
             }
+            //Voie les changements pour le pot
+            
+            //Voie si il y a eu un changement pour le joystick
+            std::string old_joystick = "";
+            std::string new_joystick = "";
+            if (old_received_msg["JoyY"] <= 150) {
+                old_joystick += "S";
+            } else if (old_received_msg["JoyY"] >= 900) {
+                old_joystick += "N";
+            }
+            if (old_received_msg["JoyX"] <= 150) {
+                old_joystick += "E";
+            } else if (old_received_msg["JoyX"] >= 900) {
+                old_joystick += "O";
+            }
+
+            if (parsed_received_msg["JoyY"] <= 150) {
+                new_joystick += "S";
+            } else if (parsed_received_msg["JoyY"] >= 900) {
+                new_joystick += "N";
+            }
+            if (parsed_received_msg["JoyX"] <= 150) {
+                new_joystick += "E";
+            } else if (parsed_received_msg["JoyX"] >= 900) {
+                new_joystick += "O";
+            }
+
+            if (old_joystick != new_joystick && new_joystick != "")
+            {
+                q->push(new_joystick);
+            }
+
             old_received_msg = parsed_received_msg;
             /*
             for(int i = 0; i <= sizeof(parsed_received_msg); i++){
@@ -71,11 +109,12 @@ Manette::Manette(const std::string& port, concurrent_queue<std::string>* q){
         led_state = !led_state;
 
         // Bloquer le fil pour environ 1 sec
-        Sleep(35); // 1000ms
+        Sleep(40); // 1000ms
     }
 }
 
-bool Manette::try_parse_int(const std::string& str){
+bool Manette::try_parse_int(const std::string& str)
+{
     try {
         std::stoi(str);
         return true;
