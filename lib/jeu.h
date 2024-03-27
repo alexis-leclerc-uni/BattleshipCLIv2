@@ -17,7 +17,7 @@
 #include <iostream>
 #include <windows.h>
 #include <string>
-#include <
+#include <cmath>
 #include "Joueur.h"
 #include "../external_libs/concurrent_queue.hpp"
 
@@ -43,6 +43,8 @@ class Jeu {
         int menuInitJoueur(std::ostream& sout, std::istream& sin,Joueur* joueur);
         bool afficherTir1(std::ostream& sout, Joueur *joueur, Joueur *adversaire);
         bool afficherTir2(std::ostream& sout, Joueur* joueur, Joueur* adversaire);
+        bool afficherTir3(std::ostream& sout, Joueur* joueur, Joueur* adversaire);
+        bool afficherTir4(std::ostream& sout, Joueur* joueur, Joueur* adversaire);
         int menuTir(std::ostream& sout, std::istream& sin,Joueur* joueur, Joueur* adversaire);
         bool afficherFin(std::ostream& sout);
         int menuFin(std::ostream& sout, std::istream& sin);

@@ -42,15 +42,19 @@ Manette::Manette(const std::string& port, concurrent_queue<std::string>* q){
         
         // Impression du message de l'Arduino si valide
         if(raw_msg.size()>0){
-            // std::cout << "raw_msg: " << raw_msg << std::endl;  // debug
+            //std::cout << "raw_msg: " << raw_msg << std::endl;  // debug
             // Transfert du message en json
             //std::cout << raw_msg << std::endl;
-            parsed_received_msg = json::parse(raw_msg);
+            try
+            {
+                parsed_received_msg = json::parse(raw_msg);
+            }
+            catch(...){}
             for (auto it = parsed_received_msg.items().begin(); it != parsed_received_msg.items().end(); ++it) {
                 std::string key = it.key();
                 auto value = it.value();
                 if(value != old_received_msg[key]){
-                    if((key).find("Acc") && key.find("time") && key.find("pot") && key.find("JoyX") && key.find("JoyY")){
+                    if((key).find("AccX") && (key).find("AccY") && (key).find("AccZ") && key.find("time") && key.find("pot") && key.find("JoyX") && key.find("JoyY")){
                         if(old_received_msg[key] == 0 && value == 1){
                             q->push(key);
                         }
@@ -59,20 +63,22 @@ Manette::Manette(const std::string& port, concurrent_queue<std::string>* q){
             }
             if (old_received_msg["pot"] != nullptr)
             {
-                int new_pot = parsed_received_msg["pot"].get<int>();
-                int old_pot = old_received_msg["pot"].get<int>();
+                try {
+                    int new_pot = parsed_received_msg["pot"].get<int>();
+                    int old_pot = old_received_msg["pot"].get<int>();
 
-                //Voie les changements pour le pot
-                //std::cout << new_pot << std::endl;
-                if (new_pot + 15 < old_pot || new_pot - 15 > old_pot) {
-                    if (new_pot < 100)
-                        q->push("pot0" + std::to_string(new_pot));
-                    else
-                        q->push("pot" + std::to_string(new_pot));
-                }
+                    //Voie les changements pour le pot
+                    //std::cout << new_pot << std::endl;
+                    if (new_pot + 15 < old_pot || new_pot - 15 > old_pot) {
+                        if (new_pot < 100)
+                            q->push("pot0" + std::to_string(new_pot));
+                        else
+                            q->push("pot" + std::to_string(new_pot));
+                    }
+                } catch (...){}
             }
             //Voie si il y a eu un changement pour le joystick
-            if (old_received_msg.contains("JoyX"))
+            if (old_received_msg["JoyX"] != nullptr)
             {
                 std::string old_joystick = "";
                 std::string new_joystick = "";
@@ -105,6 +111,7 @@ Manette::Manette(const std::string& port, concurrent_queue<std::string>* q){
             }
 
             old_received_msg = parsed_received_msg;
+            
             /*
             for(int i = 0; i <= sizeof(parsed_received_msg); i++){
                 std::cout << i << std::endl;

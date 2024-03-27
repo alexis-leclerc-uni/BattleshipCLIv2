@@ -46,14 +46,12 @@ int Jeu::menuStartUp(std::ostream& sout, std::istream& sin)
     this->q->pop();
     if (result == "bouton2")
         return CONFIRMER;
-    else if (result == "bouton4")
+    else if (result == "bouton4"){
+        sout << "Merci d'etre la";
         return QUITTER;
-    else if (result.substr(0,3) == "pot"){
+    } else if (result.substr(0,3) == "pot"){
         valPot = std::stoi(result.substr(3,3));
-        std::cout << result << std::endl;
     }
-    else if (result[0] == 'N' || result[0] == 'S' || result[0] == 'E' || result[0] == 'O')
-        std::cout << result << std::endl;
     return INCORRECT;
 }
 //Description : Afficher le menu de réglage
@@ -70,7 +68,7 @@ bool Jeu::afficherReglage(std::ostream& sout)
 bool Jeu::afficherTailleEnX(std::ostream& sout)
 {
     sout << "Choisir la taille en X" << std::endl;
-    sout << "Utiliser le Joystick ou le bouton de gauche et de droite pour sélectionner la taille en X" << std::endl;
+    sout << "Utiliser le Joystick ou le bouton de gauche et de droite pour selectionner la taille en X" << std::endl;
     return true;
 }
 //Description : Afficher le menu de réglage (demande la taille en Y)
@@ -79,7 +77,7 @@ bool Jeu::afficherTailleEnX(std::ostream& sout)
 bool Jeu::afficherTailleEnY(std::ostream& sout)
 {
     sout << "Choisir la taille en Y" << std::endl;
-    sout << "Utiliser le Joystick ou le bouton de gauche et de droite pour sélectionner la taille en Y" << std::endl;
+    sout << "Utiliser le Joystick ou le bouton de gauche et de droite pour selectionner la taille en Y" << std::endl;
     return true;
 }
 //Description : Afficher le menu de réglage (demande la taille en Y)
@@ -90,7 +88,7 @@ bool Jeu::afficherMode(std::ostream& sout)
     sout << "Inscrivez le mode de jeu choisi :" << std::endl;
     sout << "Bouton gauche : Mode normal" << std::endl;
     sout << "Bouton haut : Mode rafale" << std::endl;
-    sout << "Bouton droite : Mode stratégique" << std::endl;
+    sout << "Bouton droite : Mode strategique" << std::endl;
     return true;
 }
 //Description : Demande au joueur la taille de la carte
@@ -100,28 +98,34 @@ int Jeu::menuReglage(std::ostream& sout, std::istream& sin)
 {
     afficherReglage(sout);
     afficherMode(sout);
-    std::string result = "";
     
     /*  Bouton de gauche = mode normal
         Bouton de droite = mode strategie
         Bouton de haut = mode rafale
     */
+    tailleEnX = 5;
+    tailleEnY = 5;
     std::string result = "";
-    while(this->q->empty()){
-        Sleep(50);
-    };
-    result = this->q->front();
-    this->q->pop();
-    if (result == "bouton2")
-        mode = MODE_NORMAL;
-    else if (result == "bouton4")
-        mode = MODE_STRATEGIE;
-    else if (result == "bouton1")
-        mode = MODE_RAFALE;
-    else if (result.substr(0,3) == "pot"){
-        valPot = std::stoi(result.substr(3,3));
-        std::cout << result << std::endl;
-    }
+    mode = -1;
+    do {
+        while(this->q->empty()){
+            Sleep(50);
+        };
+        result = this->q->front();
+        this->q->pop();
+        sout << result << std::endl;
+        if (result == "bouton2") {
+            mode = MODE_NORMAL;}
+        else if (result == "bouton4") {
+            mode = MODE_STRATEGIE; }
+        else if (result == "bouton1") {
+            mode = MODE_RAFALE; }
+        else if (result.substr(0,3) == "pot"){
+            sout << result << std::endl;
+            valPot = std::stoi(result.substr(3,3));
+        }
+        sout << mode << std::endl;
+    } while (!(0 <= mode && mode <= 2));
 
     afficherTailleEnX(sout);
     do {
@@ -179,7 +183,7 @@ int Jeu::menuReglage(std::ostream& sout, std::istream& sin)
         else if (result.substr(0,3) == "pot"){
             valPot = std::stoi(result.substr(3,3));
         }
-        sout << "taille en X : " << tailleEnY << std::endl;
+        sout << "taille en X : " << tailleEnX << std::endl;
     } while (result != "bouton1");
     afficherTailleEnY(sout);
     do {
@@ -237,7 +241,7 @@ int Jeu::menuReglage(std::ostream& sout, std::istream& sin)
             valPot = std::stoi(result.substr(3,3));
         }
         sout << "taille en Y : " << tailleEnY << std::endl;
-    } while (result == "bouton1");
+    } while (result != "bouton1");
     
 
     return CONFIRMER;
@@ -313,9 +317,9 @@ int Jeu::menuInitJoueur(std::ostream& sout, std::istream& sin,Joueur* joueur)
             else if (result.substr(0,3) == "pot"){
                 valPot = std::stoi(result.substr(3,3));
             }
-
-        } while (!joueur->ajouterBateau(x,y,horizontal,tailleBateau[i]));
-        
+        } while (!(joueur->positionBateau(x,y,horizontal,tailleBateau[i]) && result == "bouton1"));
+        joueur->ajouterBateau(x,y,horizontal, tailleBateau[i]);
+        continue;
     }
     return CONFIRMER;
 }
@@ -420,16 +424,16 @@ bool Jeu::afficherTir1(std::ostream& sout, Joueur *joueur, Joueur *adversaire)
     sout << "Choix de missile :" << std::endl;
     bool* type = joueur->getTypeAccepte();
     if (type[0])
-        sout << "1 : Missile normal (1 case) (prend 1 tour)" << std::endl;
+        sout << "Bouton haut : Missile normal (1 case) (prend 1 tour)" << std::endl;
     if (type[1])
-        sout << "2 : Sonde géographique (5 cases en losange) (prend 1 tour) (ne cause pas de dommage)" << std::endl;
+        sout << "Bouton gauche : Sonde géographique (5 cases en losange) (prend 1 tour) (ne cause pas de dommage)" << std::endl;
     if (type[2])
-        sout << "3 : Missile ligne (5 cases en ligne droite HORIZONTALE) (prend 3 tour)" << std::endl;
+        sout << "bouton bas : Missile ligne (5 cases en ligne droite HORIZONTALE) (prend 3 tour)" << std::endl;
     if (type[3])
-        sout << "4 : Missile colonne (5 cases en ligne droite VERTICALE) (prend 3 tour)" << std::endl;
+        sout << "bouton droit : Missile colonne (5 cases en ligne droite VERTICALE) (prend 3 tour)" << std::endl;
     if (type[4])
-        sout << "5 : Missile Bombe (5 cases en losange) (prend 3 tour)" << std::endl;
-    sout << "Choissisez le type de missile : ";
+        sout << "bouton joystick : Missile Bombe (5 cases en losange) (prend 3 tour)" << std::endl;
+    sout << "Choissisez le type de missile" << std::endl;
     return true;
 }
 //Description : Afficher le menu pour que le joueur tir sur l'adversaire
@@ -437,7 +441,24 @@ bool Jeu::afficherTir1(std::ostream& sout, Joueur *joueur, Joueur *adversaire)
 //Sortie : Vrai si ça affiche
 bool Jeu::afficherTir2(std::ostream& sout, Joueur* joueur, Joueur* adversaire)
 {
-    sout << "Rentrer la position de votre missile (x y) : ";
+    sout << "Selectionner l'angle du canon par rapport au sol avec le potentiometre" << std::endl;
+    sout << "Le potentiometre va de 0 a 90 degree" << std::endl;
+    sout << "Confirmer avec le bouton haut" << std::endl;
+    return true;
+}
+
+bool Jeu::afficherTir3(std::ostream& sout, Joueur* joueur, Joueur* adversaire)
+{
+    sout << "Selectionner l'angle horizontal du canon, viser bien!" << std::endl;
+    sout << "Le potentiometre va de -90 a 90 degree" << std::endl;
+    sout << "Confirmer avec le bouton haut" << std::endl;
+    return true;
+}
+bool Jeu::afficherTir4(std::ostream& sout, Joueur* joueur, Joueur* adversaire)
+{
+    sout << "Selectionner la puissance du canon (POW!!)" << std::endl;
+    sout << "Le potentiometre va de 0 a " << tailleEnX << " case" << std::endl;
+    sout << "Confirmer avec le bouton haut" << std::endl;
     return true;
 }
 //Description : Le joueur tir sur son adversaire
@@ -446,61 +467,80 @@ bool Jeu::afficherTir2(std::ostream& sout, Joueur* joueur, Joueur* adversaire)
 int Jeu::menuTir(std::ostream& sout, std::istream& sin,Joueur* joueur, Joueur* adversaire)
 {
     Coordonnee cord = {-1,-1};
+    std::string result;
     int reponse = 0;
-    do {
-        if (joueur->getChargement() > 0)
+    sout << joueur->getChargement() << std::endl;
+    if (joueur->getChargement() > 0)
+    {
+        joueur->setChargement(joueur->getChargement() - 1);
+        if (joueur->getChargement() == 0) //Fin du chargement
         {
-            joueur->setChargement(joueur->getChargement() - 1);
-            if (joueur->getChargement() == 0) //Fin du chargement
+            cord = joueur->getCordAttente();
+            switch (joueur->getTypeMissile())
             {
-                cord = joueur->getCordAttente();
-                switch (joueur->getTypeMissile())
+            case M_LIGNE:
+                //En ligne HORIZONTALE
+                for (int i = 0; i < 5; i++)
                 {
-                case M_LIGNE:
-                    //En ligne HORIZONTALE
-                    for (int i = 0; i < 5; i++)
-                    {
-                        joueur->tirer(cord, adversaire);
-                        ++cord.x;
-                    }
-                    break;
-                case M_COLONNE:
-                    //En ligne VERTICALE
-                    for (int i = 0; i < 5; i++)
-                    {
-                        joueur->tirer(cord, adversaire);
-                        ++cord.y;
-                    }
-                    break;
-                case M_BOMBE:
-                    // En losange
                     joueur->tirer(cord, adversaire);
-                    --cord.x;
-                    joueur->tirer(cord, adversaire);
-                    ++cord.x; --cord.y;
-                    joueur->tirer(cord, adversaire);
-                    ++cord.x; ++cord.y;
-                    joueur->tirer(cord, adversaire);
-                    --cord.x; ++cord.y;
-                    joueur->tirer(cord, adversaire);
-                    break;
-                    
+                    ++cord.x;
                 }
                 break;
+            case M_COLONNE:
+                //En ligne VERTICALE
+                for (int i = 0; i < 5; i++)
+                {
+                    joueur->tirer(cord, adversaire);
+                    ++cord.y;
+                }
+                break;
+            case M_BOMBE:
+                // En losange
+                joueur->tirer(cord, adversaire);
+                --cord.x;
+                joueur->tirer(cord, adversaire);
+                ++cord.x; --cord.y;
+                joueur->tirer(cord, adversaire);
+                ++cord.x; ++cord.y;
+                joueur->tirer(cord, adversaire);
+                --cord.x; ++cord.y;
+                joueur->tirer(cord, adversaire);
+                break;
+                
             }
-            break;
-
         }
-        //Déterminer le type de Missile
-        int type;
-        do {
-            afficherTir1(sout, joueur, adversaire);
-            sin >> type;
-        } while (!joueur->setTypeMissile(type));
-        afficherTir2(sout, joueur, adversaire);
-        sin >> cord.x >> cord.y;
 
-        std::string result; // Demande l'élévation
+    }
+    else if (joueur->getChargement() == 0)
+    {
+        //Déterminer le type de Missile
+        int type = -1;
+        afficherTir1(sout, joueur, adversaire);
+        do {
+            while(this->q->empty()){ //Attente du joueur
+                Sleep(50);
+            };
+            result = this->q->front();
+            this->q->pop();
+            if (result.substr(0,3) == "pot"){
+                valPot = std::stoi(result.substr(3,3));
+            }
+            else if (result == "bouton1")
+                type = M_NORMAL;
+            else if (result == "bouton2")
+                type = M_SONDE;
+            else if (result == "bouton3")
+                type = M_LIGNE;
+            else if (result == "bouton4")
+                type = M_COLONNE;
+            else if (result == "JoyBouton")
+                type = M_BOMBE;
+            
+        } while (!joueur->setTypeMissile(type));
+
+        afficherTir2(sout, joueur, adversaire);
+
+            // Demande l'élévation
         do {
             while(this->q->empty()){ //Attente du joueur
                 Sleep(50);
@@ -511,7 +551,9 @@ int Jeu::menuTir(std::ostream& sout, std::istream& sin,Joueur* joueur, Joueur* a
                 valPot = std::stoi(result.substr(3,3));
             }
         } while (result != "bouton1");
-        int elevation = (valPot - 60)/10.22222;// degre elevation
+        int elevation = (990 - valPot)/10.22222;// degre elevation
+
+        afficherTir3(sout, joueur, adversaire);
         do {
             while(this->q->empty()){ //Attente du joueur
                 Sleep(50);
@@ -522,7 +564,9 @@ int Jeu::menuTir(std::ostream& sout, std::istream& sin,Joueur* joueur, Joueur* a
                 valPot = std::stoi(result.substr(3,3));
             }
         } while (result != "bouton1");
-        int angle = (valPot - 460)/5.11111; // rotation gauche droite
+        int angle = (520 - valPot)/5.11111; // rotation gauche droite
+
+        afficherTir4(sout, joueur, adversaire);
         do {
             while(this->q->empty()){ //Attente du joueur
                 Sleep(50);
@@ -533,7 +577,8 @@ int Jeu::menuTir(std::ostream& sout, std::istream& sin,Joueur* joueur, Joueur* a
                 valPot = std::stoi(result.substr(3,3));
             }
         } while (result != "bouton1");
-        int vitesseTir = (valPot - 60)/(920/(tailleEnX * 1.5));// puissance du tir
+        int vitesseTir = (990 - valPot)/(920/(tailleEnX * 1.5));// puissance du tir
+
         int distance;
         float vitX = vitesseTir * sinf((elevation * 2 * 3.1415) / 360);
         float vitY = vitesseTir * cosf((elevation * 2 * 3.1415) / 360);
@@ -585,8 +630,7 @@ int Jeu::menuTir(std::ostream& sout, std::istream& sin,Joueur* joueur, Joueur* a
             joueur->setCordAttente(cord);
             break;
         }
-        
-    } while (reponse == 1 || reponse == 2);
+    }
     return false;
 
 }

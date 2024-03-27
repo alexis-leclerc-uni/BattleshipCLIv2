@@ -5,7 +5,7 @@
 Joueur::Joueur(int tailleEnX, int taillEnY)
 {
     carte = new Carte(tailleEnX, taillEnY);
-    chargement = -1;
+    chargement = 0;
     typeMissile = -1;
     for (int i = 0; i < 5; i++)
         typeAccepte[i] = true;
@@ -78,6 +78,33 @@ int Joueur::sonder(Coordonnee position, Joueur* adversaire)
 //Description : La fonction permet d'installer un bateau sur la carte
 //Entrée : Prend la position, l'orientation et la taille
 //Sortie : Retourne si le bateau a été placé
+bool Joueur::positionBateau(int x, int y, bool horizontal, int taille)
+{
+    if (horizontal) //horizontal
+    {
+        if (!(0 <= x && x + taille - 1 < carte->getTailleEnX() && 0 <= y && y < carte->getTailleEnY()))
+            return false;
+    }
+    else { //vertical
+        if (!(0 <= y && y + taille - 1 < carte->getTailleEnY() && 0 <= x && x < carte->getTailleEnX()))
+            return false;
+    }
+    //Vérifie qu'il n'y a pas de superposition entre bateau
+    for (int i = 0; i < bateau.size(); i++)
+    {
+        if (horizontal == true && bateau[i]->getOrientation() == false && bateau[i]->getCoordonnee().y <= y && y < bateau[i]->getCoordonnee().y + bateau[i]->getTaille() && x <= bateau[i]->getCoordonnee().x && bateau[i]->getCoordonnee().x < x + taille)
+            return false;
+        if (horizontal == false && bateau[i]->getOrientation() == true && bateau[i]->getCoordonnee().x <= x && x < bateau[i]->getCoordonnee().x + bateau[i]->getTaille() && y <= bateau[i]->getCoordonnee().y && bateau[i]->getCoordonnee().y < y + taille)
+            return false;
+        if (horizontal == true && bateau[i]->getOrientation() == true && y == bateau[i]->getCoordonnee().y && bateau[i]->getCoordonnee().x - taille < x && x < bateau[i]->getCoordonnee().x + bateau[i]->getTaille())
+            return false;
+        if (horizontal == false && bateau[i]->getOrientation() == false && x == bateau[i]->getCoordonnee().x && bateau[i]->getCoordonnee().y - taille < y && y < bateau[i]->getCoordonnee().y + bateau[i]->getTaille())
+            return false;
+    }
+    // Le bateau peut être placé
+    return true;
+}
+
 bool Joueur::ajouterBateau(int x, int y, bool horizontal, int taille)
 {
     //Vérifie que le bateau est dans la carte
@@ -122,9 +149,10 @@ void Joueur::afficherHistoriqueTir(std::ostream& s)
 
     std::string contenuCase = "";
 
-
+    std::string tableau = "";
     for (int y = 0; y < sizeY; y++)
     {
+        std::string ligne = "";
         for (int x = 0; x < sizeX; x++)
         {
             switch (this->tweaksAffichage(carte->getPositionTableau(y, x)))
@@ -146,12 +174,13 @@ void Joueur::afficherHistoriqueTir(std::ostream& s)
                     contenuCase = " ";
                     break;
             }
-            s << "[" << contenuCase << "]";
+            ligne = ligne + "[" + contenuCase + "]";
             //s << "[" << carte->getPositionTableau(y, x) << "]";
         }
-        s << std::endl;
+
+        tableau = ligne + '\n' + tableau;
     }
-    
+    s << tableau << std::endl;
     return;
 }
 void Joueur::afficherCartePreparation(std::ostream& s, Coordonnee pos, bool dir, int taille)
@@ -166,9 +195,11 @@ void Joueur::afficherCartePreparation(std::ostream& s, Coordonnee pos, bool dir,
 
     std::string contenuCase = "";
 
+    std::string tableau = "";
 
     for (int y = 0; y < sizeY; y++)
     {
+        std::string ligne = "";
         for (int x = 0; x < sizeX; x++)
         {
             if (dir && y == pos.y && pos.x <= x && x < pos.x + taille)
@@ -192,11 +223,13 @@ void Joueur::afficherCartePreparation(std::ostream& s, Coordonnee pos, bool dir,
                     contenuCase = beginGris + "*" + escape;
                     break;
                 }
-            s << "[" << contenuCase << "]";
+            ligne = ligne + "[" + contenuCase + "]";
             //s << "[" << carte->getPositionTableau(y, x) << "]";
         }
-        s << std::endl;
+
+        tableau = ligne + '\n' + tableau;
     }
+    s << tableau << std::endl;
     return;
 }
 void Joueur::afficherCarteBateau(std::ostream& s)
@@ -211,9 +244,10 @@ void Joueur::afficherCarteBateau(std::ostream& s)
 
     std::string contenuCase = "";
 
-
+    std::string tableau = "";
     for (int y = 0; y < sizeY; y++)
     {
+        std::string ligne = "";
         for (int x = 0; x < sizeX; x++)
         {
             switch (this->tweaksAffichage(carte->getPositionTableau(y, x)))
@@ -232,11 +266,13 @@ void Joueur::afficherCarteBateau(std::ostream& s)
                 contenuCase = beginGris + "*" + escape;
                 break;
             }
-            s << "[" << contenuCase << "]";
+            ligne = ligne + "[" + contenuCase + "]";
             //s << "[" << carte->getPositionTableau(y, x) << "]";
         }
-        s << std::endl;
+
+        tableau = ligne + '\n' + tableau;
     }
+    s << tableau << std::endl;
     return;
 }
 int Joueur::getChargement()

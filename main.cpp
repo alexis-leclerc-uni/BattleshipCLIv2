@@ -39,7 +39,7 @@ int lejeu(concurrent_queue<std::string>* q)
     jeu.afficherStartUp(std::cout);
     while ((reponse = jeu.menuStartUp(std::cout, std::cin)) == INCORRECT) {}
     if (reponse == QUITTER)
-        return 0;
+        exit(0);
     //Le joueur commence
     do {
         //jeu.menuReglage(std::cout, myFile);
@@ -64,8 +64,8 @@ int lejeu(concurrent_queue<std::string>* q)
         jeu.afficherFin(std::cout);
         while ((reponse = jeu.menuFin(std::cout, std::cin)) == INCORRECT) {}
         if (reponse == QUITTER)
-            return 0;
+            exit(0);
     } while (true);
     
-    return 0;
+    exit(0);
 }
