@@ -499,6 +499,62 @@ int Jeu::menuTir(std::ostream& sout, std::istream& sin,Joueur* joueur, Joueur* a
         } while (!joueur->setTypeMissile(type));
         afficherTir2(sout, joueur, adversaire);
         sin >> cord.x >> cord.y;
+
+        std::string result; // Demande l'élévation
+        do {
+            while(this->q->empty()){ //Attente du joueur
+                Sleep(50);
+            };
+            result = this->q->front();
+            this->q->pop();
+            if (result.substr(0,3) == "pot"){
+                valPot = std::stoi(result.substr(3,3));
+            }
+        } while (result != "bouton1");
+        int elevation = (valPot - 60)/10.22222;// degre elevation
+        do {
+            while(this->q->empty()){ //Attente du joueur
+                Sleep(50);
+            };
+            result = this->q->front();
+            this->q->pop();
+            if (result.substr(0,3) == "pot"){
+                valPot = std::stoi(result.substr(3,3));
+            }
+        } while (result != "bouton1");
+        int angle = (valPot - 460)/5.11111; // rotation gauche droite
+        do {
+            while(this->q->empty()){ //Attente du joueur
+                Sleep(50);
+            };
+            result = this->q->front();
+            this->q->pop();
+            if (result.substr(0,3) == "pot"){
+                valPot = std::stoi(result.substr(3,3));
+            }
+        } while (result != "bouton1");
+        int vitesseTir = (valPot - 60)/(920/(tailleEnX * 1.5));// puissance du tir
+        int distance;
+        float vitX = vitesseTir * sinf((elevation * 2 * 3.1415) / 360);
+        float vitY = vitesseTir * cosf((elevation * 2 * 3.1415) / 360);
+        //sout << vitX << vitY << std::endl;
+        float t1 = (vitY + sqrtf(vitY * vitY)) / 9.8;
+        float t2 = (vitY - sqrtf(vitY * vitY)) / 9.8;
+        //sout << t1 << t2 << std::endl;
+        if (t1 == 0.0)
+        {
+            distance = vitX * t2;
+        }
+        if (t2 == 0.0)
+        {
+            distance = vitX * t1;
+        }
+        //sout << distance << std::endl;
+        cord.x = -2 + distance * cosf(angle * 2 * 3.1415 / 360);
+        cord.y = 4 + distance * sinf(angle * 2 * 3.1415 / 360);
+        //sout << cord.x << cord.y << std::endl;
+
+
         switch (type)
         {
         case M_NORMAL:
@@ -532,6 +588,7 @@ int Jeu::menuTir(std::ostream& sout, std::istream& sin,Joueur* joueur, Joueur* a
         
     } while (reponse == 1 || reponse == 2);
     return false;
+
 }
 //Description : Afficher le menu de fin
 //Entrée : un canal de communication
