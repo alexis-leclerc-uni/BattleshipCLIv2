@@ -154,6 +154,51 @@ void Joueur::afficherHistoriqueTir(std::ostream& s)
     
     return;
 }
+void Joueur::afficherCartePreparation(std::ostream& s, Coordonnee pos, bool dir, int taille)
+{
+    int sizeX, sizeY;
+    sizeX = carte->getTailleEnX();
+    sizeY = carte->getTailleEnY();
+
+    std::string beginRouge = "\033[31m";
+    std::string beginGris = "\033[38;5;214m";
+    std::string escape = "\033[0m";
+
+    std::string contenuCase = "";
+
+
+    for (int y = 0; y < sizeY; y++)
+    {
+        for (int x = 0; x < sizeX; x++)
+        {
+            if (dir && y == pos.y && pos.x <= x && x < pos.x + taille)
+                contenuCase = beginGris + "*" + escape;
+            else if (!dir && x == pos.x && pos.y <= y && y < pos.y + taille)
+                contenuCase = beginGris + "*" + escape;
+            else
+                switch (this->tweaksAffichage(carte->getPositionTableau(y, x)))
+                {
+                case 0:
+                    contenuCase = " ";
+                    break;
+                case 1:
+                    contenuCase = "*";
+                    break;
+                case 2:
+                    contenuCase = beginRouge + "*" + escape;
+                    break;
+                case 3:
+                case 4:
+                    contenuCase = beginGris + "*" + escape;
+                    break;
+                }
+            s << "[" << contenuCase << "]";
+            //s << "[" << carte->getPositionTableau(y, x) << "]";
+        }
+        s << std::endl;
+    }
+    return;
+}
 void Joueur::afficherCarteBateau(std::ostream& s)
 {
     int sizeX, sizeY;

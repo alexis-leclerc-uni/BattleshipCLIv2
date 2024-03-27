@@ -36,6 +36,7 @@ int lejeu(concurrent_queue<std::string>* q)
     //std::cout<<sizeof(q);
     Jeu jeu(q);
     int reponse;
+    jeu.afficherStartUp(std::cout);
     while ((reponse = jeu.menuStartUp(std::cout, std::cin)) == INCORRECT) {}
     if (reponse == QUITTER)
         return 0;
@@ -60,13 +61,11 @@ int lejeu(concurrent_queue<std::string>* q)
             jeu.menuJeuStrategique(std::cout, std::cin);
             break;
         }
-        
+        jeu.afficherFin(std::cout);
         while ((reponse = jeu.menuFin(std::cout, std::cin)) == INCORRECT) {}
         if (reponse == QUITTER)
             return 0;
     } while (true);
-    //myFile.close();
-    //�crire la base
     
     return 0;
 }

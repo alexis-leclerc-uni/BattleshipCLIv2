@@ -27,6 +27,7 @@ class Joueur {
         Coordonnee getCordAttente();
         void setCordAttente(Coordonnee);
         void afficherHistoriqueTir(std::ostream& s);
+        void afficherCartePreparation(std::ostream& s, Coordonnee pos, bool dir, int taille);
         void afficherCarteBateau(std::ostream& s);
         bool actualiseCarte();
         bool* getTypeAccepte();

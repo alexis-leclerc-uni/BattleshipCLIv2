@@ -10,7 +10,6 @@
 
 Manette::Manette(const std::string& port, concurrent_queue<std::string>* q){
     std::string raw_msg;
-
     // Initialisation du port de communication
     std::string com;
     //cin >> com;
@@ -43,7 +42,7 @@ Manette::Manette(const std::string& port, concurrent_queue<std::string>* q){
         
         // Impression du message de l'Arduino si valide
         if(raw_msg.size()>0){
-            //std::cout << "raw_msg: " << raw_msg << std::endl;  // debug
+            // std::cout << "raw_msg: " << raw_msg << std::endl;  // debug
             // Transfert du message en json
             //std::cout << raw_msg << std::endl;
             parsed_received_msg = json::parse(raw_msg);
@@ -55,45 +54,54 @@ Manette::Manette(const std::string& port, concurrent_queue<std::string>* q){
                         if(old_received_msg[key] == 0 && value == 1){
                             q->push(key);
                         }
-                        if (value + 15 < old_received_msg[key] || value - 15 > old_received_msg[key]) {
-                            if (value < 100)
-                                q->push("pot0" + std::to_string(value));
-                            else
-                                q->push("pot" + std::to_string(value));
-                        }
                     }
                 }
             }
-            //Voie les changements pour le pot
-            
-            //Voie si il y a eu un changement pour le joystick
-            std::string old_joystick = "";
-            std::string new_joystick = "";
-            if (old_received_msg["JoyY"] <= 150) {
-                old_joystick += "S";
-            } else if (old_received_msg["JoyY"] >= 900) {
-                old_joystick += "N";
-            }
-            if (old_received_msg["JoyX"] <= 150) {
-                old_joystick += "E";
-            } else if (old_received_msg["JoyX"] >= 900) {
-                old_joystick += "O";
-            }
-
-            if (parsed_received_msg["JoyY"] <= 150) {
-                new_joystick += "S";
-            } else if (parsed_received_msg["JoyY"] >= 900) {
-                new_joystick += "N";
-            }
-            if (parsed_received_msg["JoyX"] <= 150) {
-                new_joystick += "E";
-            } else if (parsed_received_msg["JoyX"] >= 900) {
-                new_joystick += "O";
-            }
-
-            if (old_joystick != new_joystick && new_joystick != "")
+            if (old_received_msg["pot"] != nullptr)
             {
-                q->push(new_joystick);
+                int new_pot = parsed_received_msg["pot"].get<int>();
+                int old_pot = old_received_msg["pot"].get<int>();
+
+                //Voie les changements pour le pot
+                //std::cout << new_pot << std::endl;
+                if (new_pot + 15 < old_pot || new_pot - 15 > old_pot) {
+                    if (new_pot < 100)
+                        q->push("pot0" + std::to_string(new_pot));
+                    else
+                        q->push("pot" + std::to_string(new_pot));
+                }
+            }
+            //Voie si il y a eu un changement pour le joystick
+            if (old_received_msg.contains("JoyX"))
+            {
+                std::string old_joystick = "";
+                std::string new_joystick = "";
+                if (old_received_msg["JoyY"] <= 150) {
+                    old_joystick += "S";
+                } else if (old_received_msg["JoyY"] >= 900) {
+                    old_joystick += "N";
+                }
+                if (old_received_msg["JoyX"] <= 150) {
+                    old_joystick += "E";
+                } else if (old_received_msg["JoyX"] >= 900) {
+                    old_joystick += "O";
+                }
+
+                if (parsed_received_msg["JoyY"] <= 150) {
+                    new_joystick += "S";
+                } else if (parsed_received_msg["JoyY"] >= 900) {
+                    new_joystick += "N";
+                }
+                if (parsed_received_msg["JoyX"] <= 150) {
+                    new_joystick += "E";
+                } else if (parsed_received_msg["JoyX"] >= 900) {
+                    new_joystick += "O";
+                }
+
+                if (old_joystick != new_joystick && new_joystick != "")
+                {
+                    q->push(new_joystick);
+                }
             }
 
             old_received_msg = parsed_received_msg;

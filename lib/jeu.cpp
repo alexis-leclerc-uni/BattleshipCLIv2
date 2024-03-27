@@ -5,6 +5,8 @@
 //Sortie : rien
 Jeu::Jeu()
 {
+    tailleEnX = 5;
+    tailleEnY = 5;
 }
 //Description : Construit le jeu avec queue
 //Entrée : rien
@@ -27,7 +29,8 @@ Jeu::~Jeu()
 bool Jeu::afficherStartUp(std::ostream& sout)
 {
     sout << "Bienvenue au Battleship" << std::endl;
-    sout << "Continuer? Y/N" << std::endl;
+    sout << "Continuer? Appuyer sur le bouton gauche" << std::endl;
+    sout << "Appuyer sur le bouton droite pour quitter" << std::endl;
     return false;
 }
 //Description : Demande au joueur s'il veut commencer une partie ou quitter
@@ -36,34 +39,22 @@ bool Jeu::afficherStartUp(std::ostream& sout)
 int Jeu::menuStartUp(std::ostream& sout, std::istream& sin)
 {
     std::string result = "";
-    afficherStartUp(sout);
-
     while(this->q->empty()){
-        std::cout << "ATTENTE" << std::endl;
         Sleep(100);
     };
     result = this->q->front();
     this->q->pop();
-    if (result == "bouton1")
+    if (result == "bouton2")
         return CONFIRMER;
-    else if (result == "bouton2")
-        return QUITTER;
-    else if (result == "bouton3")
-        return INCORRECT;
     else if (result == "bouton4")
-        return INCORRECT;
-    else if (result[0] == 'p' && result[1] == 'o' && result[2] == 't'){
-        std::cout << result;
-        return INCORRECT;
+        return QUITTER;
+    else if (result.substr(0,3) == "pot"){
+        valPot = std::stoi(result.substr(3,3));
+        std::cout << result << std::endl;
     }
-    else if (result == "")
-        return INCORRECT;
-    else if (result == "")
-        return INCORRECT;
-    else if (result == "")
-        return INCORRECT;
-    else if (result == "")
-        return INCORRECT;
+    else if (result[0] == 'N' || result[0] == 'S' || result[0] == 'E' || result[0] == 'O')
+        std::cout << result << std::endl;
+    return INCORRECT;
 }
 //Description : Afficher le menu de réglage
 //Entrée : un canal de communication
@@ -78,7 +69,8 @@ bool Jeu::afficherReglage(std::ostream& sout)
 //Sortie : Vrai si ça affiche
 bool Jeu::afficherTailleEnX(std::ostream& sout)
 {
-    sout << "Inscrivez la taille en X : ";
+    sout << "Choisir la taille en X" << std::endl;
+    sout << "Utiliser le Joystick ou le bouton de gauche et de droite pour sélectionner la taille en X" << std::endl;
     return true;
 }
 //Description : Afficher le menu de réglage (demande la taille en Y)
@@ -86,7 +78,8 @@ bool Jeu::afficherTailleEnX(std::ostream& sout)
 //Sortie : Vrai si ça affiche
 bool Jeu::afficherTailleEnY(std::ostream& sout)
 {
-    sout << "Inscrivez la taille en Y : ";
+    sout << "Choisir la taille en Y" << std::endl;
+    sout << "Utiliser le Joystick ou le bouton de gauche et de droite pour sélectionner la taille en Y" << std::endl;
     return true;
 }
 //Description : Afficher le menu de réglage (demande la taille en Y)
@@ -95,10 +88,9 @@ bool Jeu::afficherTailleEnY(std::ostream& sout)
 bool Jeu::afficherMode(std::ostream& sout)
 {
     sout << "Inscrivez le mode de jeu choisi :" << std::endl;
-    sout << "1 : Mode normal" << std::endl;
-    sout << "2 : Mode rafale" << std::endl;
-    sout << "3 : Mode stratégique" << std::endl;
-    sout << "Votre choix : ";
+    sout << "Bouton gauche : Mode normal" << std::endl;
+    sout << "Bouton haut : Mode rafale" << std::endl;
+    sout << "Bouton droite : Mode stratégique" << std::endl;
     return true;
 }
 //Description : Demande au joueur la taille de la carte
@@ -107,18 +99,145 @@ bool Jeu::afficherMode(std::ostream& sout)
 int Jeu::menuReglage(std::ostream& sout, std::istream& sin)
 {
     afficherReglage(sout);
+    afficherMode(sout);
+    std::string result = "";
+    
+    /*  Bouton de gauche = mode normal
+        Bouton de droite = mode strategie
+        Bouton de haut = mode rafale
+    */
+    std::string result = "";
+    while(this->q->empty()){
+        Sleep(50);
+    };
+    result = this->q->front();
+    this->q->pop();
+    if (result == "bouton2")
+        mode = MODE_NORMAL;
+    else if (result == "bouton4")
+        mode = MODE_STRATEGIE;
+    else if (result == "bouton1")
+        mode = MODE_RAFALE;
+    else if (result.substr(0,3) == "pot"){
+        valPot = std::stoi(result.substr(3,3));
+        std::cout << result << std::endl;
+    }
+
+    afficherTailleEnX(sout);
     do {
-        afficherMode(sout);
-        sin >> mode;
-    } while (mode <= 0 || mode > 3);
+        
+        /*  Bouton de gauche, Joystick O SO S = baisse la taille
+            Bouton de droite, Joystick N NE E = augmente la taille
+            Bouton de haut = confirmer
+        */
+        
+        while(this->q->empty()){ //Attente du joueur
+            Sleep(50);
+        };
+        result = this->q->front();
+        this->q->pop();
+        if (result == "bouton2"){
+            if (tailleEnX > MIN_X){
+                --tailleEnX;
+            }
+        }
+        else if (result == "bouton4"){
+            if (tailleEnX < MAX_X){
+                ++tailleEnX;
+            }
+        }
+        else if (result == "N"){
+            if (tailleEnX < MAX_X){
+                ++tailleEnX;
+            }
+        }
+        else if (result == "NE"){
+            if (tailleEnX < MAX_X){
+                ++tailleEnX;
+            }
+        }
+        else if (result == "E"){
+            if (tailleEnX < MAX_X){
+                ++tailleEnX;
+            }
+        }
+        else if (result == "S"){
+            if (tailleEnX > MIN_X){
+                --tailleEnX;
+            }
+        }
+        else if (result == "SO"){
+            if (tailleEnX > MIN_X){
+                --tailleEnX;
+            }
+        }
+        else if (result == "O"){
+            if (tailleEnX > MIN_X){
+                --tailleEnX;
+            }
+        }  
+        else if (result.substr(0,3) == "pot"){
+            valPot = std::stoi(result.substr(3,3));
+        }
+        sout << "taille en X : " << tailleEnY << std::endl;
+    } while (result != "bouton1");
+    afficherTailleEnY(sout);
     do {
-        afficherTailleEnX(sout);
-        sin >> tailleEnX;
-    } while (tailleEnX <= 0);
-    do {
-        afficherTailleEnY(sout);
-        sin >> tailleEnY;
-    } while (tailleEnY <= 0);
+        /*  Bouton de gauche, Joystick O SO S = baisse la taille
+            Bouton de droite, Joystick N NE E = augmente la taille
+            Bouton de haut = confirmer
+        */
+        
+        while(this->q->empty()){ //Attente du joueur
+            Sleep(50);
+        };
+        result = this->q->front();
+        this->q->pop();
+        if (result == "bouton2"){
+            if (tailleEnY > MIN_Y){
+                --tailleEnY;
+            }
+        }
+        else if (result == "bouton4"){
+            if (tailleEnY < MAX_Y){
+                ++tailleEnY;
+            }
+        }
+        else if (result == "N"){
+            if (tailleEnY < MAX_Y){
+                ++tailleEnY;
+            }
+        }
+        else if (result == "NE"){
+            if (tailleEnY < MAX_Y){
+                ++tailleEnY;
+            }
+        }
+        else if (result == "E"){
+            if (tailleEnY < MAX_Y){
+                ++tailleEnY;
+            }
+        }
+        else if (result == "S"){
+            if (tailleEnY > MAX_Y){
+                --tailleEnY;
+            }
+        }
+        else if (result == "SO"){
+            if (tailleEnY > MIN_Y){
+                --tailleEnY;
+            }
+        }
+        else if (result == "O"){
+            if (tailleEnY > MIN_Y){
+                --tailleEnY;
+            }
+        }  
+        else if (result.substr(0,3) == "pot"){
+            valPot = std::stoi(result.substr(3,3));
+        }
+        sout << "taille en Y : " << tailleEnY << std::endl;
+    } while (result == "bouton1");
     
 
     return CONFIRMER;
@@ -136,7 +255,8 @@ bool Jeu::afficherInitJoueur(std::ostream& sout, Joueur *joueur)
 //Sortie : Vrai si ça affiche
 bool Jeu::afficherInitTaille(std::ostream& sout, Joueur *joueur, int taille)
 {
-    sout << "La taille est de " << taille << ". Placer selon le format suivant : x y horizontal" << std::endl;
+    sout << "La taille est de " << taille << ". Placer le bateau avec le joystick." << std::endl;
+    sout << "Utiliser le bouton bas pour changer la direction du bateau" << std::endl;
     return false;
 }
 //Description : Le joueur installe ses bateaux
@@ -146,14 +266,54 @@ int Jeu::menuInitJoueur(std::ostream& sout, std::istream& sin,Joueur* joueur)
 {
     afficherInitJoueur(sout, joueur);
     int tailleBateau[] = {5,4,3,3,2};
-    int x = -1; int y = -1;
-    bool horizontal;
+    int x = 0; int y = 0;
+    bool horizontal = true;
+    std::string result;
     for (int i = 0; i < 5; i++)
     {
-        joueur->afficherCarteBateau(sout);
         do {
+            //Joystick contrôle la position
+            //Le bouton bas contrôle la direction
+            sautDePage(sout);
             afficherInitTaille(sout, joueur, tailleBateau[i]);
-            sin >> x >> y >> horizontal;
+            joueur->afficherCartePreparation(sout, {x, y}, horizontal, tailleBateau[i]);
+            
+            while(this->q->empty()){ //Attente du joueur
+                Sleep(50);
+            };
+            result = this->q->front();
+            this->q->pop();
+            if (result == "bouton3"){
+                horizontal = !horizontal;
+            }
+            else if (result == "N"){
+                y++;
+            }
+            else if (result == "NE"){
+                y++; x++;
+            }
+            else if (result == "E"){
+                x++;
+            }
+            else if (result == "SE"){
+                y--; x++;
+            }
+            else if (result == "S"){
+                y--;
+            }
+            else if (result == "SO"){
+                x--; y--;
+            }
+            else if (result == "O"){
+                x--;
+            }
+            else if (result == "NO"){
+                x--; y++;
+            }
+            else if (result.substr(0,3) == "pot"){
+                valPot = std::stoi(result.substr(3,3));
+            }
+
         } while (!joueur->ajouterBateau(x,y,horizontal,tailleBateau[i]));
         
     }
@@ -290,11 +450,9 @@ int Jeu::menuTir(std::ostream& sout, std::istream& sin,Joueur* joueur, Joueur* a
     do {
         if (joueur->getChargement() > 0)
         {
-            sout << "Je suis en chargement" << std::endl;
             joueur->setChargement(joueur->getChargement() - 1);
             if (joueur->getChargement() == 0) //Fin du chargement
             {
-                sout << "I shitted :(" << std::endl;
                 cord = joueur->getCordAttente();
                 switch (joueur->getTypeMissile())
                 {
@@ -384,7 +542,9 @@ bool Jeu::afficherFin(std::ostream& sout)
         sout << "Le joueur 1 a gagné!!! ";
     else
         sout << "Le joueur 2 a gagné!!! ";
-    sout << "Bravo, c'est la fin. Voulez-vous recommencer (Y/N) : ";
+    sout << "Bravo, c'est la fin. Voulez-vous recommencer?" << std::endl;
+    sout << "Appuyer sur le bouton haut pour recommancer" << std::endl;
+    sout << "Appuyer sur le bouton bas pour quitter" << std::endl;
     return false;
 }
 //Description : Demande au joueur s'il veut continuer
@@ -392,13 +552,20 @@ bool Jeu::afficherFin(std::ostream& sout)
 //Sortie : 0 si on recommence, 1 si on quitte
 int Jeu::menuFin(std::ostream& sout, std::istream& sin)
 {
-    afficherFin(sout);
-    char c;
-    sin >> c;
-    if (c == 'y' || c == 'Y')
+    
+    std::string result;
+    while(this->q->empty()){ //Attente du joueur
+        Sleep(50);
+    };
+    result = this->q->front();
+    this->q->pop();
+    if (result == "bouton1"){
         return CONFIRMER;
-    if (c == 'n' || c == 'n')
+    }
+    else if (result == "bouton3")
+    {
         return QUITTER;
+    }
     return INCORRECT;
 }
 //Description : Ajoute un joueur au vector
@@ -420,4 +587,8 @@ Joueur* Jeu::getJoueur(int index)
 int Jeu::getMode()
 {
     return mode;
+}
+void Jeu::sautDePage(std::ostream& sout)
+{
+    sout << "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
 }

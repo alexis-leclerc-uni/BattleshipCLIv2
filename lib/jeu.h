@@ -4,12 +4,19 @@
 #define CONFIRMER 0
 #define QUITTER 1
 #define INCORRECT 2
+#define ATTENTE 3
 #define MODE_NORMAL 1
 #define MODE_RAFALE 2
 #define MODE_STRATEGIE 3
 
+#define MIN_X 5
+#define MIN_Y 5
+#define MAX_X 15
+#define MAX_Y 15
+
 #include <iostream>
 #include <windows.h>
+#include <string>
 #include "Joueur.h"
 #include "../external_libs/concurrent_queue.hpp"
 
@@ -41,7 +48,9 @@ class Jeu {
         void ajouterJoueur();
         Joueur* getJoueur(int index);
         int getMode();
+        void sautDePage(std::ostream& sout);
     private:
+        int valPot;
         int tailleEnX;
         int tailleEnY;
         int mode;
